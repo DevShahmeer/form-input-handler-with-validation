@@ -2,13 +2,13 @@ import { useState } from "react";
 import "./App.css";
 
 function App() {
-  const [formData, setFromData] = useState({
+  const [formData, setFormData] = useState({
     username: "",
     email: "",
     phone: "",
   });
 
-  const [error, SetError] = useState({
+  const [error, setError] = useState({
     username: "",
     email: "",
     phone: "",
@@ -18,68 +18,101 @@ function App() {
     const { name, value } = target;
 
     let errorMessage = "";
-
-    if (!/^\d*$/.test(value)) {
-      errorMessage = "Please add only number";
-    } else if (value.length > 0 && value.length <= 10) {
-      errorMessage = "Phone number must be at least 10 digits";
+    if (name === "phone") {
+      if (!/^\d*$/.test(value)) {
+        errorMessage = "Please enter only numbers";
+      } else if (value.length > 0 && value.length < 10) {
+        errorMessage = "Phone number must be at least 10 digits";
+      }
     } else if (name === "email" && value.length > 0) {
       if (!/\S+@\S+\.\S+/.test(value)) {
         errorMessage = "Please enter a valid email";
       }
-    } else if (name === "username" && value.length > 0 && value.length < 10) {
+    } else if (name === "username" && value.length > 0 && value.length < 3) {
       errorMessage = "Username must be at least 3 characters";
     }
 
-    setFromData((prevData) => ({
-      ...prevData,
+    // Update error state with new error message
+    setError((prevErrors) => ({
+      ...prevErrors,
       [name]: errorMessage,
     }));
 
-    setFromData((prevError) => ({
-      ...prevError,
+    // Update form data
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
     }));
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    console.log("Form Submit", formData);
+
+    // Check if any fields empty
+    const hasEmptyFields = Object.values(formData).some(
+      (value) => value === ""
+    );
+    if (hasEmptyFields) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    // Check if any field has error
+    const hasError = Object.values(error).some((errorMsg) => errorMsg !== "");
+    if (hasError) {
+      alert("Please fix all errors before submitting");
+      return;
+    }
+
+    // Form is valid, proceed with submission
+    alert("Form submitted successfully!");
+  };
+
   return (
-    <>
-      <div>
-        <h2>Content Form</h2>
-        <form action="">
-          <div>
-            <label htmlFor="username">Username: </label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="email">Email: </label>
-            <input
-              type="text"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="phone">Phone: </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-            />
-          </div>
-        </form>
-      </div>
-    </>
+    <div className="form-container">
+      <h2>Contact Form</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="username">Username: </label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+          />
+          {error.username && <p className="error-text">{error.username}</p>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="email">Email: </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          {error.email && <p className="error-text">{error.email}</p>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="phone">Phone Number: </label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            value={formData.phone} // Changed from number to phone
+            onChange={handleChange}
+          />
+          {error.phone && <p className="error-text">{error.phone}</p>}
+        </div>
+
+        <button type="submit">Submit</button>
+      </form>
+    </div>
   );
 }
 
