@@ -8,11 +8,36 @@ function App() {
     phone: "",
   });
 
+  const [error, SetError] = useState({
+    username: "",
+    email: "",
+    phone: "",
+  });
+
   const handleChange = ({ target }) => {
     const { name, value } = target;
 
+    let errorMessage = "";
+
+    if (!/^\d*$/.test(value)) {
+      errorMessage = "Please add only number";
+    } else if (value.length > 0 && value.length <= 10) {
+      errorMessage = "Phone number must be at least 10 digits";
+    } else if (name === "email" && value.length > 0) {
+      if (!/\S+@\S+\.\S+/.test(value)) {
+        errorMessage = "Please enter a valid email";
+      }
+    } else if (name === "username" && value.length > 0 && value.length < 10) {
+      errorMessage = "Username must be at least 3 characters";
+    }
+
     setFromData((prevData) => ({
       ...prevData,
+      [name]: errorMessage,
+    }));
+
+    setFromData((prevError) => ({
+      ...prevError,
       [name]: value,
     }));
   };
